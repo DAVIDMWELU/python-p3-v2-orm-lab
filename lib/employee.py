@@ -88,7 +88,6 @@ class Employee:
                 INSERT INTO employees (name, job_title, department_id)
                 VALUES (?, ?, ?)
         """
-
         CURSOR.execute(sql, (self.name, self.job_title, self.department_id))
         CONN.commit()
 
@@ -114,7 +113,6 @@ class Employee:
             DELETE FROM employees
             WHERE id = ?
         """
-
         CURSOR.execute(sql, (self.id,))
         CONN.commit()
 
@@ -156,9 +154,7 @@ class Employee:
             SELECT *
             FROM employees
         """
-
         rows = CURSOR.execute(sql).fetchall()
-
         return [cls.instance_from_db(row) for row in rows]
 
     @classmethod
@@ -169,7 +165,6 @@ class Employee:
             FROM employees
             WHERE id = ?
         """
-
         row = CURSOR.execute(sql, (id,)).fetchone()
         return cls.instance_from_db(row) if row else None
 
@@ -181,10 +176,17 @@ class Employee:
             FROM employees
             WHERE name is ?
         """
-
         row = CURSOR.execute(sql, (name,)).fetchone()
         return cls.instance_from_db(row) if row else None
 
     def reviews(self):
         """Return list of reviews associated with current employee"""
-        pass
+        from review import Review  # Avoid circular import
+
+        sql = """
+            SELECT *
+            FROM reviews
+            WHERE employee_id = ?
+        """
+        rows = CURSOR.execute(sql, (self.id,)).fetchall()
+        return [Review.instance_from_db(row) for row in rows]
